@@ -1,7 +1,9 @@
 # hero.py
+from random import choice
 from ability import Ability
 from armor import Armor
 from weapon import Weapon
+
 
 class Hero:
     def __init__(self, name, starting_health=100):
@@ -11,12 +13,16 @@ class Hero:
             name: String
             starting_health: Integer
             current_health: Integer
+            deaths: Integer
+            kills: Integer
         '''
         self.abilities = list()
         self.armors = list()
         self.name = name
         self.starting_health = starting_health
         self.current_health = starting_health
+        self.deaths = 0  # Track the number of deaths
+        self.kills = 0   # Track the number of kills
 
     def add_ability(self, ability):
         ''' Add ability to abilities list '''
@@ -34,10 +40,6 @@ class Hero:
     def add_armor(self, armor):
         '''Add armor to self.armors'''
         self.armors.append(armor)
-
-    def add_weapon(self, weapon):
-        ''' Add weapon to abilities list (treating weapon like an ability) '''
-        self.abilities.append(weapon)
 
     def defend(self):
         '''Calculate the total block amount from all armor blocks.
@@ -58,6 +60,14 @@ class Hero:
         '''Return True or False depending on whether the hero is alive or not.'''
         return self.current_health > 0
 
+    def add_kill(self, num_kills):
+        ''' Update self.kills by num_kills amount'''
+        self.kills += num_kills
+
+    def add_death(self, num_deaths):
+        ''' Update self.deaths by num_deaths amount'''
+        self.deaths += num_deaths
+
     def fight(self, opponent):
         '''Current Hero will take turns fighting the opponent hero passed in.'''
         while True:
@@ -71,20 +81,15 @@ class Hero:
             opponent.take_damage(self_damage)
 
             if not opponent.is_alive():
+                self.add_kill(1)  # Self gains a kill if the opponent dies
+                opponent.add_death(1)  # Opponent gains a death
                 print(f"{self.name} won!")
                 return
 
             self.take_damage(opponent_damage)
 
             if not self.is_alive():
+                opponent.add_kill(1)  # Opponent gains a kill if self dies
+                self.add_death(1)  # Self gains a death
                 print(f"{opponent.name} won!")
                 return
-
-
-if __name__ == "__main__":
-    # If you run this file from the terminal
-    # this block is executed.
-    hero = Hero("Wonder Woman")
-    weapon = Weapon("Lasso of Truth", 90)
-    hero.add_weapon(weapon)
-    print(hero.attack())
